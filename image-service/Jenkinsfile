@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        // 🔗 Replace with your actual private GitHub repo URL
+        REPO_URL = 'https://github.com/Sharmila127/image-service.git'
+        IMAGE_NAME = 'image-service'
+        CONTAINER_NAME = 'image-service'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo '🔹 Checking out source code from private GitHub repo...'
+                // Jenkins credential ID for GitHub (make sure to create it as github_credentials)
+                git branch: 'main',
+                    url: "${REPO_URL}",
+                    credentialsId: 'github_credentials'
+            }
+        }
+
+        stage('Clean Old Containers & Images') {
+            steps {
+                script {
+                    echo '🧹 Cleaning old Docker containers and images...'
+                    sh '''
+                    docker rm -f ${CONTAINER_NAME} || true
+                    docker image rm ${IMAGE_NAME}:latest || true
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo '🐳 Building Docker image for Image Service...'
+                    sh 'docker build -t ${IMAGE_NAME}:latest .'
+                }
+            }
+        }
+
+        stage('Run with Docker Compose') {
+            steps {
+                script {
+                    echo '🚀 Starting Image Service and dependencies using docker-compose...'
+                    sh 'docker-compose down || true'
+                    sh 'docker-compose up -d --build'
+                }
+            }
+        }
+
+        stage('Verify Running Container') {
+            steps {
+                script {
+                    echo '🔍 Checking running container status...'
+                    sh 'docker ps | grep ${CONTAINER_NAME} || true'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Image Service deployed successfully via Jenkins!'
+        }
+        failure {
+            echo '❌ Jenkins pipeline failed. Please check logs.'
+        }
+    }
+}

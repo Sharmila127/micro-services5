@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  assessment-service:
+    build: ./assessment-service
+    container_name: assessment-service
+    ports:
+      - "3001:3001"
+
+  billing-service:
+    build: ./billing-service
+    container_name: billing-service
+    ports:
+      - "3004:3004"
+
+  enrollment-service:
+    build: ./enrollment-service
+    container_name: enrollment-service
+    ports:
+      - "3000:3000"
+
+  image-service:
+    build: ./image-service
+    container_name: image-service
+    ports:
+      - "3003:3003"
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "3002:3002"
+
+# Optional: API Gateway if you have one
+# Uncomment this if you have gateway folder
+#  api-gateway:
+#    build: ./api-gateway
+#    container_name: api-gateway
+#    ports:
+#      - "3005:3005"
+#    depends_on:
+#      - assessment-service
+#      - billing-service
+#      - enrollment-service
+#      - image-service
+#      - notification-service
+
